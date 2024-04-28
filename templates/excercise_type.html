@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <title>Flex & Tone</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <link rel="stylesheet" href="static/css/excercise_type.css">
-    <style>
-       
-    </style>
+    
 </head>
 <body>
+
+
     <header>
         <div class="label"><div class="text-wrapper">Choose Exercise</div></div>
     </header>
@@ -22,7 +21,7 @@
             </div>
             <img src="static/img/dumbbel.gif" />
             <div class="button-container">
-                <a href="{{ url_for('restart') }}" class="restart"><strong>START</strong></a>
+                <a href="{{ url_for('dumbble_curl_page') }}" class="restart"><strong>START</strong></a>
             </div>
         </div>
 
@@ -33,7 +32,7 @@
            
             <img src="static/img/alter_front_dumbbel.gif" />
             <div class="button-container">
-                <a href="{{ url_for('restart') }}" class="restart"><strong>START</strong></a>
+                <a href="{{ url_for('front_dumbble_raise_page') }}" class="restart"><strong>START</strong></a>
             </div>
         </div>
 
@@ -44,7 +43,7 @@
            
             <img src="static/img/squat.gif" />
             <div class="button-container">
-                <a href="{{ url_for('restart') }}" class="restart"><strong>START</strong></a>
+                <a href="{{ url_for('dumbble_squat_page') }}" class="restart"><strong>START</strong></a>
             </div>
         </div>
     </main>

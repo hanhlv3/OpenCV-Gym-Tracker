@@ -1,10 +1,19 @@
-from flask import Flask, render_template, Response,jsonify
+from flask import Flask, render_template, Response,jsonify, redirect, url_for
 import cv2
 import numpy as np
 import mediapipe as mp
+from flask_mysqldb import MySQL
+
 
 # Initialize Flask app
 app = Flask(__name__)
+
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_DB'] = 'gym_tracker'
+
+mysql = MySQL(app)
 
 # Initialize mediapipe pose class
 mp_pose = mp.solutions.pose
@@ -14,6 +23,20 @@ show_message = False
 counter_left = 0  # Define global variables for counters
 counter_right = 0
 
+counter = {
+        1: {
+            'right': 0,
+            'left': 0,
+        },
+        2: {
+            'right': 0,
+            'left': 0,
+        },
+        3: {
+            'right': 0,
+            'left': 0,
+        }
+}
 
 # Function to calculate the angle between three points
 def calculate_angle(a, b, c):
@@ -30,11 +53,11 @@ def calculate_angle(a, b, c):
     return angle 
 
 # Function to stream the video with landmarks and angles displayed
-def video_stream():
+def video_stream(id):
     global counter_left, counter_right
     cap = cv2.VideoCapture(0)
-    counter_left = 0
-    counter_right = 0
+    counter[id]['left'] = 0
+    counter[id]['right'] = 0
     stage_left = None
     stage_right = None
 
@@ -62,50 +85,95 @@ def video_stream():
                 left_shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x, landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
                 left_elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x, landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
                 left_wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x, landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
-                angle_left = calculate_angle(left_shoulder, left_elbow, left_wrist)
+                left_hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
+                left_ankle = [landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value].x,landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value].y]
+                left_knee = [landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].x,landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].y]
+                
+                
+                
+               
 
                 # Right Arm
                 right_shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
                 right_elbow = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
                 right_wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
-                angle_right = calculate_angle(right_shoulder, right_elbow, right_wrist)
-
-                # Visualize angle for left arm
-                cv2.putText(image, f"Left Angle: {angle_left:.2f}", tuple(np.multiply(left_elbow, [640, 480]).astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
-
-                # Visualize angle for right arm
-                cv2.putText(image, f"Right Angle: {angle_right:.2f}", tuple(np.multiply(right_elbow, [640, 480]).astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
-
-                # Counter logic for left arm
+                right_hip = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
                 
-                if angle_left > 160 and stage_left != 'down':
-                    stage_left = "down"
-                if angle_left < 30 and stage_left == 'down':
-                    stage_left = "up"
-                    # Increase count value only when all landmarks are visible
-                    counter_left += 1
-                    if counter_left == 25:
-                        counter_left = 0
-
-                # Inside the code block for right arm count
+                #elbow angle
+                left_elbow_angle = calculate_angle(left_shoulder, left_elbow, left_wrist)
+                right_elbow_angle = calculate_angle(right_shoulder, right_elbow, right_wrist)
                 
-                if angle_right > 160 and stage_right != 'down':
-                    stage_right = "down"
-                if angle_right < 30 and stage_right == 'down':
-                    stage_right = "up"
-                    # Increase count value only when all landmarks are visible
+                #shoulder angle 
+                left_shoulder_angle = calculate_angle(left_elbow, left_shoulder, left_hip)
+                right_shoulder_angle = calculate_angle(right_elbow, right_shoulder, right_hip)
+                
+                #knee angle 
+                knee_angle = calculate_angle(left_hip, left_knee, left_ankle)
+                
+                
+                #Visualize angle
+                if id == 1: 
+                    # Visualize angle for left arm elbow
+                    cv2.putText(image, f"Left Angle: {left_elbow_angle:.2f}", tuple(np.multiply(left_elbow, [640, 480]).astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
 
-                    counter_right += 1
-                    if counter_right == 25:
-                        counter_right = 0
-
-
+                    # Visualize angle for right arm elbow
+                    cv2.putText(image, f"Right Angle: {right_elbow_angle:.2f}", tuple(np.multiply(right_elbow, [640, 480]).astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+                    # Counter logic for left arm
+                
+                    if left_elbow_angle > 160 and stage_left != 'down':
+                        stage_left = "down"
+                    if left_elbow_angle < 30 and stage_left == 'down':
+                        stage_left = "up"
+                        # Increase count value only when all landmarks are visible
+                        counter[id]['left'] += 1
+                      
+                        if counter_left == 25:
+                            counter_left = 0
+                    # Inside the code block for right arm count
+                    
+                    if right_elbow_angle > 160 and stage_right != 'down':
+                        stage_right = "down"
+                    if right_elbow_angle < 30 and stage_right == 'down':
+                        stage_right = "up"
+                        # Increase count value only when all landmarks are visible
+                        counter[id]['right'] += 1
+                        if counter_right == 25:
+                            counter_right = 0
+                elif id == 2:
+                    # Visualize angle for left arm shoulder
+                    cv2.putText(image, f"Left Angle: {left_shoulder_angle:.2f}", tuple(np.multiply(left_shoulder, [640, 480]).astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+  
+                    # Visualize angle for right arm shoulder
+                    cv2.putText(image, f"Right Angle: {right_shoulder_angle:.2f}", tuple(np.multiply(right_shoulder, [640, 480]).astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+                    if left_shoulder_angle >= 90 and stage_left == 'down': 
+                            stage_left = "up"
+                            counter[id]['left'] += 1
+                    if left_shoulder_angle < 20 and stage_left != 'down' :
+                            stage_left = "down"
+                            
+                    if right_shoulder_angle >= 90 and stage_right == 'down': 
+                            stage_right = "up"
+                            counter[id]['right'] += 1
+                    if right_shoulder_angle < 20 and stage_right != 'down':
+                            stage_right = "down" 
+                elif id == 3:  
+                    # Visualize angle for knee
+                    cv2.putText(image, f"Left Angle: {knee_angle:.2f}", tuple(np.multiply(left_knee, [640, 480]).astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+                 # 3. Dumbbell Goblet Squat
+                    if left_shoulder_angle < 90 and right_shoulder_angle < 90 and left_elbow_angle < 90 and right_shoulder_angle < 90:   
+                        if knee_angle > 160 and stage_left == 'down':
+                            stage_left = "up"
+                            counter[id]['left'] += 1
+                            counter[id]['right'] += 1
+                        if knee_angle < 100 and stage_left != 'down': 
+                            stage_left = "down"
+                
             except:
                 pass
             
             # Render counters
-            cv2.putText(image, f"Left Count: {counter_left}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
-            cv2.putText(image, f"Right Count: {counter_right}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+            cv2.putText(image, f"Left Count: {counter[id]['left']}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+            cv2.putText(image, f"Right Count: {counter[id]['right']}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
             
             # Render detections
             mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
@@ -121,40 +189,63 @@ def video_stream():
     cap.release()
     cv2.destroyAllWindows()
     
-
-
 # Route for the index page
 @app.route('/')
 def index():
-    return render_template('index1.html')
+    return render_template('home.html')
+
+@app.route('/sign_in')
+def sign_in():
+    return render_template('sign_in.html')
+
+@app.route('/sign_up')
+def sign_up():
+    return render_template('sign_up.html')
 
 @app.route('/excercise_type')
 def display_excercise_type():
     return render_template('excercise_type.html')
 
-@app.route('/restart')
-def restart():
-    return render_template('index1.html')
+@app.route('/dumbble_curl')
+def dumbble_curl_page():
+    global counter
+    return render_template('dumbble_curl.html',counter_left=counter[1]['left'], counter_right=counter[1]['right'])
 
-@app.route('/get_counts')
-def get_counts():
-    global counter_left, counter_right
+@app.route('/front_dumbble_raise')
+def front_dumbble_raise_page():
+    global counter 
+    return render_template('front_dumbble_raise.html',counter_left=counter[2]['left'], counter_right=counter[2]['right'])
+
+@app.route('/dumbble_squat')
+def dumbble_squat_page():
+    global counter 
+    return render_template('dumbble_squat.html',counter_left=counter[3]['left'], counter_right=counter[3]['right'])
+
+@app.route('/restart/<int:id>')
+def restart(id):
+    global counter
+    counter[id]['left'] = 0
+    counter[id]['right'] = 0
+    if id == 1:
+       return  redirect(url_for('dumbble_curl_page'))
+    elif id == 2:
+       return  redirect(url_for('front_dumbble_raise_page'))
+    elif id == 3:
+       return  redirect(url_for('dumbble_squat_page'))
+    return render_template('home.html')
+
+@app.route('/get_counts/<int:id>')
+def get_counts(id):
+    global counter
     # Return updated counts as JSON response
-    return jsonify({'counter_left': counter_left, 'counter_right': counter_right})
-
-
-@app.route('/phy_health')
-def phy_health():
-    global counter_left, counter_right  
-    print(counter_left)
-    print(counter_right)
-    return render_template('index.html',counter_left=counter_left, counter_right=counter_right)
+    return jsonify({'counter_left': counter[id]['left'], 'counter_right': counter[id]['right']})
 
 
 # Route for video feed
-@app.route('/video_feed')
-def video_feed():
-    return Response(video_stream(), mimetype='multipart/x-mixed-replace; boundary=frame')
+@app.route('/video_feed/<int:id>')
+def video_feed(id):
+    print(id)
+    return Response(video_stream(id), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
     app.run(debug=True)

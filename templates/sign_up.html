@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Importance of Physical Health</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="static/css/sign_in.css"> <!-- Link to your CSS file -->
+</head>
+<body>
+
+    <div class="container">
+        <h2>Sign Up</h2>
+        <form action="/login" method="POST">
+          <label for="useraccount">Account name:</label>
+          <input type="text" id="accountname" name="accountname" required><br><br>
+
+          <label for="username">Full name:</label>
+          <input type="text" id="username" name="username" required><br><br>
+      
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password" required><br><br>
+      
+          <input type="submit" value="Sign Up">
+          <span class="sign_up">Do you have account? <a href="{{ url_for('sign_in') }}">Sign In</a></span>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</body>
+</html>

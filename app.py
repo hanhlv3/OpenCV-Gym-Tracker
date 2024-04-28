@@ -128,6 +128,10 @@ def video_stream():
 def index():
     return render_template('index1.html')
 
+@app.route('/excercise_type')
+def display_excercise_type():
+    return render_template('excercise_type.html')
+
 @app.route('/restart')
 def restart():
     return render_template('index1.html')

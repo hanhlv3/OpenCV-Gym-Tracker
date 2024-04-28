@@ -24,7 +24,7 @@ body {
     top: 30px;
     display: flex;
     gap: 20px;
-    margin-right: 50px;
+    margin-right: 70px;
 }
 
 .form-login .button:last-child {
@@ -38,6 +38,11 @@ body {
     text-decoration: none;
     color: black;
     font-size: 25px;
+}
+
+.form-login .button:hover a {
+    color: white;
+    
 }
 
 .form-login .sign-in {

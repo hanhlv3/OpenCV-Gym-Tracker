@@ -1,12 +1,15 @@
-from flask import Flask, render_template, Response,jsonify, redirect, url_for
+from flask import Flask, render_template, Response,jsonify, redirect, url_for, request, flash
 import cv2
 import numpy as np
 import mediapipe as mp
 from flask_mysqldb import MySQL
+from db.user import get_user, save_user
 
 
 # Initialize Flask app
 app = Flask(__name__)
+
+app.secret_key = 'hanhlevan'
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
@@ -37,6 +40,9 @@ counter = {
             'left': 0,
         }
 }
+
+
+user = None
 
 # Function to calculate the angle between three points
 def calculate_angle(a, b, c):
@@ -192,15 +198,53 @@ def video_stream(id):
 # Route for the index page
 @app.route('/')
 def index():
-    return render_template('home.html')
+    return render_template('home.html', user=user)
 
 @app.route('/sign_in')
 def sign_in():
     return render_template('sign_in.html')
 
+@app.route('/sign_in', methods=['POST'])
+def sign_in_post():
+    global user
+    accountname = request.form.get('accountname')
+    password = request.form.get('password')
+    user = get_user(accountname, password, mysql)
+    if user is not None:
+        tuple_value = user
+        user_tuple = tuple_value[0]
+        keys = ['id', 'accountname', 'user_name', 'password', 'created_at']
+
+        user_dict = dict(zip(keys, user_tuple))
+        user = user_dict
+        print(user)
+        return redirect(url_for('index'))
+    else:
+        # Login failed, show error message
+        return redirect(url_for('sign_in'))
+
 @app.route('/sign_up')
 def sign_up():
-    return render_template('sign_up.html')
+    return render_template('sign_up.html', user=user)
+
+@app.route('/sign_up', methods=['POST'])
+def sign_up_route():
+    accountname = request.form.get('accountname')
+    username = request.form.get('username')
+    password = request.form.get('password')
+    success = save_user(accountname, username, password, mysql)
+    if success:
+        # Sign up successful, redirect to home page
+        return redirect(url_for('index'))
+    else:
+        # Sign up failed, show error message
+        flash('Sign up failed')
+        return redirect(url_for('sign_up'))
+
+
+@app.route('/statical')
+def statical():
+    return render_template('statical.html')
 
 @app.route('/excercise_type')
 def display_excercise_type():

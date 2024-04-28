@@ -37,62 +37,62 @@
 
         let alertDisplayed = false; // Flag to track if the alert has been displayed
 
-    // Function to handle count updates
-    function updateCounts(data) {
-        let counter_left = data.counter_left;
-        let counter_right = data.counter_right;
+        // Function to handle count updates
+        function updateCounts(data) {
+            let counter_left = data.counter_left;
+            let counter_right = data.counter_right;
 
-        if (counter_left >= 16 && counter_right >= 16 && !alertDisplayed) {
-            const alertContainer = document.querySelector('.alert-container');
-            const alertMessage = document.createElement('div');
-            alertMessage.classList.add('alert', 'alert-success', 'mt-4');
-            alertMessage.setAttribute('role', 'alert');
-            alertMessage.innerHTML = `
-            <strong>Congratulations!</strong> You have completed the challenge. SCORE: 200 &#127942;
-            `;
-            alertContainer.appendChild(alertMessage);
+            if (counter_left >= 16 && counter_right >= 16 && !alertDisplayed) {
+                const alertContainer = document.querySelector('.alert-container');
+                const alertMessage = document.createElement('div');
+                alertMessage.classList.add('alert', 'alert-success', 'mt-4');
+                alertMessage.setAttribute('role', 'alert');
+                alertMessage.innerHTML = `
+                <strong>Congratulations!</strong> You have completed the challenge. SCORE: 200 &#127942;
+                `;
+                alertContainer.appendChild(alertMessage);
 
-            alertDisplayed = true; // Set the flag to true once the alert is displayed
+                alertDisplayed = true; // Set the flag to true once the alert is displayed
+            }
+
+            // Schedule the next fetch after a certain interval (e.g., 3 seconds)
+            setTimeout(fetchCounts, 3000);
         }
 
-        // Schedule the next fetch after a certain interval (e.g., 3 seconds)
-        setTimeout(fetchCounts, 3000);
-    }
+        function restartChallenge() {
+            // Add AJAX request to reset the counters to zero
+            $.ajax({
+                url: '/reset_counters/1', // Endpoint to reset counters
+                type: 'GET',
+                success: function(response) {
+                    // Log success message or handle the response as needed
+                    console.log('Counters reset successfully:', response);
+                    // Reset the alert flag so that the alert can be displayed again
+                    alertDisplayed = false;
+                    $('.alert-success').remove();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error resetting counters:', error);
+                }
+            });
+        }
 
-    function restartChallenge() {
-        // Add AJAX request to reset the counters to zero
-        $.ajax({
-            url: '/reset_counters/1', // Endpoint to reset counters
-            type: 'GET',
-            success: function(response) {
-                // Log success message or handle the response as needed
-                console.log('Counters reset successfully:', response);
-                // Reset the alert flag so that the alert can be displayed again
-                alertDisplayed = false;
+        $(document).ready(function() {
+            // Start fetching counts when the document is ready
+            fetchCounts();
+            handleLoadingPage();
+
+            // Event listener for the restart button
+            $('.restart').on('click', function(e) {
+                e.preventDefault();
+                restartChallenge();
+            
+            });
+            $('.get-started').on('click', function(e) {
+                // Remove the alert message from the DOM when starting the challenge again
                 $('.alert-success').remove();
-            },
-            error: function(xhr, status, error) {
-                console.error('Error resetting counters:', error);
-            }
+            });
         });
-    }
-
-    $(document).ready(function() {
-        // Start fetching counts when the document is ready
-        fetchCounts();
-        handleLoadingPage();
-
-        // Event listener for the restart button
-        $('.restart').on('click', function(e) {
-            e.preventDefault();
-            restartChallenge();
-           
-        });
-        $('.get-started').on('click', function(e) {
-            // Remove the alert message from the DOM when starting the challenge again
-            $('.alert-success').remove();
-        });
-    });
 
     </script>
  

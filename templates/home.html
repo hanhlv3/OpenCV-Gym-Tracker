@@ -7,14 +7,22 @@
 </head>
 <body>
 
+   
     <div class="form-login">
-        <div class="button sign-in">
-            <a href=" {{ url_for('sign_in') }}" >Sign In</a>
-        </div>
+        {% if user %}
+            <div class="button">
+                <a href=" {{ url_for('sign_up') }}">Statical</a>
+            </div>
+        {% else %}
+            <div class="button sign-in">
+                <a href=" {{ url_for('sign_in') }}" >Sign In</a>
+            </div>
 
-        <div class="button">
-            <a href=" {{ url_for('sign_up') }}">Sign Up</a>
-        </div>
+            <div class="button">
+                <a href=" {{ url_for('sign_up') }}">Sign Up</a>
+            </div>
+        {% endif %}
+       
     </div>
 
     <header>

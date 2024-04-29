@@ -40,7 +40,7 @@ h1 {
 .side-content {
     background-color: rgba(255, 255, 255, 0.3); /* Transparent white background */
     padding: 40px;
-    width: 37%;
+    width: 45%;
     border-radius: 10px;
     margin-right: 60px; /* Adjust spacing from the video */
     margin-top: 20px; /* Adjust top margin */
@@ -66,10 +66,17 @@ h1 {
     margin-top: 10px;
 }
 
+.button-container a:hover {
+    opacity: 0.8;
+}
+
 .exit {
     background-color: #da3651 !important;
 }
 
+.save {
+    background-color: greenyellow !important;
+}
 
 .alert-container {
     position: absolute;

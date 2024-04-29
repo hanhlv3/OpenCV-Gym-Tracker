@@ -4,7 +4,8 @@ import numpy as np
 import mediapipe as mp
 from flask_mysqldb import MySQL
 from db.user import get_user, save_user
-
+from db.workout import get_workout, insert_workout, get_total_workouts
+from db.set import insert_set, get_total_set, get_total_left_right
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -200,6 +201,8 @@ def video_stream(id):
 def index():
     return render_template('home.html', user=user)
 
+
+
 @app.route('/sign_in')
 def sign_in():
     return render_template('sign_in.html')
@@ -210,14 +213,18 @@ def sign_in_post():
     accountname = request.form.get('accountname')
     password = request.form.get('password')
     user = get_user(accountname, password, mysql)
-    if user is not None:
+    if user != ():
         tuple_value = user
         user_tuple = tuple_value[0]
         keys = ['id', 'accountname', 'user_name', 'password', 'created_at']
-
         user_dict = dict(zip(keys, user_tuple))
         user = user_dict
-        print(user)
+        
+        ##  check workout
+        workout = get_workout(user['id'], mysql)
+        if workout == ():
+           insert_workout(user['id'], mysql)
+        
         return redirect(url_for('index'))
     else:
         # Login failed, show error message
@@ -244,7 +251,11 @@ def sign_up_route():
 
 @app.route('/statical')
 def statical():
-    return render_template('statical.html')
+    total_date = get_total_workouts(user['id'], mysql)
+    total_set = get_total_set(user['id'], mysql)
+    repectition_left, repectition_right = get_total_left_right(user['id'], mysql)
+    return render_template('statical.html', total_date=total_date, 
+                           total_set=total_set, repectition_left=repectition_left, repectition_right=repectition_right)
 
 @app.route('/excercise_type')
 def display_excercise_type():
@@ -264,6 +275,27 @@ def front_dumbble_raise_page():
 def dumbble_squat_page():
     global counter 
     return render_template('dumbble_squat.html',counter_left=counter[3]['left'], counter_right=counter[3]['right'])
+
+
+
+@app.route('/save_set/<int:id>')
+def save_set(id):
+    global counter, user
+    workout = get_workout(user['id'], mysql)
+    tuple_value = workout
+    workout_tuple = tuple_value[0]
+    keys = ['workout_id', 'user_id', 'workout_date']
+    workout_dict = dict(zip(keys, workout_tuple))
+    workout = workout_dict
+    insert_set(user['id'], workout['workout_id'], id, counter[id]['left'], counter[id]['right'], mysql)
+    if id == 1:
+       return  redirect(url_for('dumbble_curl_page'))
+    elif id == 2:
+       return  redirect(url_for('front_dumbble_raise_page'))
+    elif id == 3:
+       return  redirect(url_for('dumbble_squat_page'))
+    return render_template('home.html')
+
 
 @app.route('/restart/<int:id>')
 def restart(id):

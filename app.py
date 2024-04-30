@@ -4,7 +4,7 @@ import numpy as np
 import mediapipe as mp
 from flask_mysqldb import MySQL
 from db.user import get_user, save_user
-from db.workout import get_workout, insert_workout, get_total_workouts
+from db.workout import get_workout, insert_workout, get_total_workouts,get_total_set_by_user_and_workout, get_total_left_right_by_date
 from db.set import insert_set, get_total_set, get_total_left_right
 
 # Initialize Flask app
@@ -253,9 +253,14 @@ def sign_up_route():
 def statical():
     total_date = get_total_workouts(user['id'], mysql)
     total_set = get_total_set(user['id'], mysql)
+    exercise_names, set_counts = get_total_set_by_user_and_workout(user['id'], mysql)
     repectition_left, repectition_right = get_total_left_right(user['id'], mysql)
+    workout_date, total_set_day = get_total_left_right_by_date(user['id'], mysql)
     return render_template('statical.html', total_date=total_date, 
-                           total_set=total_set, repectition_left=repectition_left, repectition_right=repectition_right)
+                           total_set=total_set, repectition_left=repectition_left,
+                           repectition_right=repectition_right,
+                           exercise_names = exercise_names  , set_counts = set_counts,
+                           workout_date = workout_date, total_set_day = total_set_day)
 
 @app.route('/excercise_type')
 def display_excercise_type():

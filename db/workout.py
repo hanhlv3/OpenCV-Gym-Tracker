@@ -26,3 +26,40 @@ def get_total_workouts(user_id, mysql):
     print(data[0][0])
     cur.close()
     return data[0][0]
+
+
+def get_total_set_by_user_and_workout(user_id, mysql):
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        SELECT e.excercise_name, COUNT(*) AS total_sets 
+        FROM excercises e 
+        INNER JOIN sets s ON e.excercise_id = s.excercise_id 
+        INNER JOIN user u ON s.user_id = u.id
+        WHERE u.id = %s
+        GROUP BY e.excercise_name
+    """, (user_id,))
+    data = cur.fetchall()
+    exercise_names = [item[0] for item in data]
+    set_counts = [item[1] for item in data]
+    
+    cur.close()
+
+    return exercise_names, set_counts
+
+def get_total_left_right_by_date(user_id, mysql):
+    cur = mysql.connection.cursor()
+    cur.execute('''
+            SELECT workout_date, COUNT(*) AS total_sets
+            FROM workouts
+            INNER JOIN sets s ON workouts.workout_id = s.workout_id
+            WHERE s.user_id = %s
+            GROUP BY workout_date
+            ORDER BY workout_date
+        ''', (user_id,))
+    data = cur.fetchall()
+    workout_da = [item[0] for item in data]
+    total_set_day = [item[1] for item in data] 
+    workout_date = [date.strftime('%Y-%m-%d') for date in workout_da]
+    print(workout_date, total_set_day)
+    cur.close()
+    return workout_date, total_set_day

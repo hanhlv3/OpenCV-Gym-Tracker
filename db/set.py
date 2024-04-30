@@ -23,6 +23,6 @@ def get_total_left_right(user_id, mysql):
     cur = mysql.connection.cursor()
     cur.execute("SELECT SUM(repetition_left), SUM(repetition_right) FROM sets WHERE user_id =%s", (user_id,))
     data = cur.fetchall()
-    print(data[0][0], data[0][1])
+
     cur.close()
     return data[0][0], data[0][1]

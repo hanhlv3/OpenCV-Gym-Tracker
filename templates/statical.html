@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <title>Statical</title>
     <!-- ======= Styles ====== -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="static/css/statical.css">
@@ -17,9 +18,9 @@
         <div class="navigation">
             <ul>
                 <li>
-                    <a href="#">
+                    <a href="{{ url_for('index') }}">
                         <span class="icon">
-                            <i class="fa-solid fa-dumbbell"></i>
+                            <ion-icon name="barbell-outline"></ion-icon>
                         </span>
                         <span class="title">Fitness Tracker</span>
                     </a>
@@ -60,33 +61,7 @@
                         <span class="title">Dumbble Squat</span>
                     </a>
                 </li>
-
-                <li>
-                    <a href="#">
-                        <span class="icon">
-                            <ion-icon name="settings-outline"></ion-icon>
-                        </span>
-                        <span class="title">Settings</span>
-                    </a>
-                </li>
-
-                <li>
-                    <a href="#">
-                        <span class="icon">
-                            <ion-icon name="lock-closed-outline"></ion-icon>
-                        </span>
-                        <span class="title">Password</span>
-                    </a>
-                </li>
-
-                <li>
-                    <a href="#">
-                        <span class="icon">
-                            <ion-icon name="log-out-outline"></ion-icon>
-                        </span>
-                        <span class="title">Sign Out</span>
-                    </a>
-                </li>
+            
             </ul>
         </div>
 
@@ -166,76 +141,29 @@
             <div class="details">
                 <div class="recentOrders">
                     <div class="cardHeader">
-                        <h2>Recent</h2>
+                        <h2>Recent workout</h2>
                         <a href="#" class="btn">View All</a>
                     </div>
 
                     <table>
                         <thead>
                             <tr>
-                                <td>Name</td>
-                                <td>Price</td>
-                                <td>Payment</td>
-                                <td>Status</td>
+                                <td>Excercise name</td>
+                                <td>Repectition left</td>
+                                <td>Repectition right</td>
+                                <td>Workout date</td>
                             </tr>
                         </thead>
 
                         <tbody>
-                            <tr>
-                                <td>Star Refrigerator</td>
-                                <td>$1200</td>
-                                <td>Paid</td>
-                                <td><span class="status delivered">Delivered</span></td>
-                            </tr>
+                            {% for item in workout_recent %}
+                                <tr>
+                                    {% for data in item %}
+                                        <td>{{ data }}</td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
 
-                            <tr>
-                                <td>Dell Laptop</td>
-                                <td>$110</td>
-                                <td>Due</td>
-                                <td><span class="status pending">Pending</span></td>
-                            </tr>
-
-                            <tr>
-                                <td>Apple Watch</td>
-                                <td>$1200</td>
-                                <td>Paid</td>
-                                <td><span class="status return">Return</span></td>
-                            </tr>
-
-                            <tr>
-                                <td>Addidas Shoes</td>
-                                <td>$620</td>
-                                <td>Due</td>
-                                <td><span class="status inProgress">In Progress</span></td>
-                            </tr>
-
-                            <tr>
-                                <td>Star Refrigerator</td>
-                                <td>$1200</td>
-                                <td>Paid</td>
-                                <td><span class="status delivered">Delivered</span></td>
-                            </tr>
-
-                            <tr>
-                                <td>Dell Laptop</td>
-                                <td>$110</td>
-                                <td>Due</td>
-                                <td><span class="status pending">Pending</span></td>
-                            </tr>
-
-                            <tr>
-                                <td>Apple Watch</td>
-                                <td>$1200</td>
-                                <td>Paid</td>
-                                <td><span class="status return">Return</span></td>
-                            </tr>
-
-                            <tr>
-                                <td>Addidas Shoes</td>
-                                <td>$620</td>
-                                <td>Due</td>
-                                <td><span class="status inProgress">In Progress</span></td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -243,81 +171,12 @@
                 <!-- ================= New Customers ================ -->
                 <div class="recentCustomers">
                     <div class="cardHeader">
-                        <h2>Recent Customers</h2>
+                        <h2>Daily exercises</h2>
+                        <input type="date" id="dateInput" />  
                     </div>
 
-                    <table>
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="static/img/customer02.jpg" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>David <br> <span>Italy</span></h4>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="static/img/customer02.jpg" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>Amit <br> <span>India</span></h4>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="static/img/customer02.jpg" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>David <br> <span>Italy</span></h4>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="static/img/customer02.jpg" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>Amit <br> <span>India</span></h4>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="static/img/customer02.jpg" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>David <br> <span>Italy</span></h4>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="static/img/customer02.jpg" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>Amit <br> <span>India</span></h4>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="static/img/customer02.jpg" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>David <br> <span>Italy</span></h4>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="static/img/customer02.jpg" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>Amit <br> <span>India</span></h4>
-                            </td>
-                        </tr>
+                    <table  id="list_set_by_date">
+                        
                     </table>
                 </div>
             </div>
@@ -325,6 +184,62 @@
     </div>
 
     <!-- =========== Scripts =========  -->
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const date = new Date();
+            console.log(date)
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0'); //January is 0!
+            const year = date.getFullYear();
+    
+            document.querySelector('#dateInput').value = `${year}-${month}-${day}`;
+            setWorkoutdate(`${year}-${month}-${day}`);
+        });
+
+        document.querySelector('#dateInput').addEventListener('change', (event) => {
+            setWorkoutdate(event.target.value)
+        });
+
+        function setWorkoutdate(date_workout) {
+            // Add AJAX request to reset the counters to zero
+            $.ajax({
+                url: '/workout_date/' + date_workout, // Endpoint to reset counters
+                type: 'GET',
+                success: function(response) {
+                    // Log success message or handle the response as needed
+                    console.log('Counters reset successfully:', response);
+                  
+                    data = response.workout_date
+                    // Clear the table
+                    $('#list_set_by_date').empty();
+                    $('#list_set_by_date').append(
+                        '<thead>' +
+                            '<tr>' +
+                                '<td>Excercise name</td>' +
+                                '<td>Total set</td>' +
+                            '</tr>' +
+                        '</thead>'
+                    );
+                    if (data.length == 0) return
+                    // Add a new row to the table for each item in the response
+                    data.forEach(function(item) {
+                        $('#list_set_by_date').append(
+                            '<tr>' +
+                            '<td>' + item[1] + '</td>' +
+                            '<td>' + item[2] + '</td>' +
+                            '</tr>'
+                        );
+                    });
+
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error resetting counters:', error);
+                }
+            });
+        }
+    </script>
     <script>
         // add hovered class to selected list item
         let list = document.querySelectorAll(".navigation li");
@@ -351,7 +266,6 @@
 
     </script>
 
-    <!-- ======= Charts JS ====== -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
     <script>
            

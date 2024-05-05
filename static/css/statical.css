@@ -63,8 +63,8 @@ body {
 
 .navigation ul li:nth-child(1) {
   margin-bottom: 40px;
-  pointer-events: none;
 }
+
 
 .navigation ul li a {
   position: relative;
@@ -73,6 +73,7 @@ body {
   display: flex;
   text-decoration: none;
   color: var(--white);
+  cursor: pointer;
 }
 .navigation ul li:hover a,
 .navigation ul li.hovered a {
@@ -343,7 +344,7 @@ body {
   text-align: end;
 }
 .details .recentOrders table tr td:nth-child(2) {
-  text-align: end;
+  text-align: center;
 }
 .details .recentOrders table tr td:nth-child(3) {
   text-align: center;
@@ -383,7 +384,6 @@ body {
 
 .recentCustomers {
   position: relative;
-  display: grid;
   min-height: 500px;
   padding: 20px;
   background: var(--white);
@@ -424,6 +424,13 @@ body {
 .recentCustomers table tr:hover td h4 span {
   color: var(--white);
 }
+
+#list_set_by_date {
+  text-align: center;
+  border-collapse: collapse;
+
+}
+
 
 /* ====================== Responsive Design ========================== */
 @media (max-width: 991px) {

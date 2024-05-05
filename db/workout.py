@@ -63,3 +63,21 @@ def get_total_left_right_by_date(user_id, mysql):
     print(workout_date, total_set_day)
     cur.close()
     return workout_date, total_set_day
+
+def get_work_out_recent(user_id, mysql):
+    cur = mysql.connection.cursor()
+    cur.execute('''
+           SELECT excercise_name, sets.repetition_left, sets.repetition_right,  workout_date
+            FROM sets INNER JOIN `user` ON sets.user_id = `user`.id
+            INNER JOIN excercises on sets.excercise_id = excercises.excercise_id
+            INNER JOIN workouts on sets.workout_id = workouts.workout_id
+            WHERE sets.user_id = %s	
+            ORDER BY workout_date DESC
+        ''', (user_id,))
+    data = cur.fetchall()
+    cur.close()
+    formatted_data = [(a, b, c, d.strftime('%Y-%m-%d')) for a, b, c, d in data]
+    array_data = [list(item) for item in formatted_data]
+    print(array_data)
+    return array_data
+    

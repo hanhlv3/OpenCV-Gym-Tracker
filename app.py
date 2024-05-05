@@ -1,11 +1,35 @@
 from flask import Flask, render_template, Response,jsonify, redirect, url_for, request, flash
 import cv2
 import numpy as np
+import pandas as pd
 import mediapipe as mp
 from flask_mysqldb import MySQL
-from db.user import get_user, save_user
-from db.workout import get_workout, insert_workout, get_total_workouts,get_total_set_by_user_and_workout, get_total_left_right_by_date
+from db.user import get_user, save_user, get_workout_by_date
+from db.workout import get_workout, insert_workout, get_total_workouts,get_total_set_by_user_and_workout, get_total_left_right_by_date, get_work_out_recent
 from db.set import insert_set, get_total_set, get_total_left_right
+from model.dumbble_curl.index import load_dumbble_curl_model, IMPORTANT_LMS_DUMBBLE_CURL, get_headers_curl
+import pickle
+
+import warnings
+from datetime import datetime
+warnings.filterwarnings('ignore')
+
+# Drawing helpers
+mp_drawing = mp.solutions.drawing_utils
+mp_pose = mp.solutions.pose
+
+def extract_important_keypoints(results, landmarks) -> list:
+    '''
+    Extract important keypoints from mediapipe pose detection
+    '''
+    landmarks = results.pose_landmarks.landmark
+
+    data = []
+    for lm in IMPORTANT_LMS_DUMBBLE_CURL:
+        keypoint = landmarks[mp_pose.PoseLandmark[lm].value]
+        data.append([keypoint.x, keypoint.y, keypoint.z, keypoint.visibility])
+    
+    return np.array(data).flatten().tolist()
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -83,7 +107,6 @@ def video_stream(id):
             image.flags.writeable = True
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             
-            # Extract landmarks
             try:
                 landmarks = results.pose_landmarks.landmark
                 
@@ -97,9 +120,6 @@ def video_stream(id):
                 left_knee = [landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].x,landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].y]
                 
                 
-                
-               
-
                 # Right Arm
                 right_shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
                 right_elbow = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
@@ -118,8 +138,24 @@ def video_stream(id):
                 knee_angle = calculate_angle(left_hip, left_knee, left_ankle)
                 
                 
-                #Visualize angle
-                if id == 1: 
+              
+                if id == 1: #dumbble curl
+                    # with open("./KNN_model.pkl", "rb") as file:
+                    #     dumbble_curl_model = pickle.load(file)
+                    #     print('lo')
+                    
+                    # dumbble_curl_model, input_scaler = load_dumbble_curl_model()
+                    # row = extract_important_keypoints(results, IMPORTANT_LMS_DUMBBLE_CURL)
+                    # header_curl = get_headers_curl()
+                    # X = pd.DataFrame([row], columns=header_curl[1:])
+                    # X = pd.DataFrame(input_scaler.transform(X))
+                    
+                    # Make prediction and its probability
+                    # predicted_class = dumbble_curl_model.predict(X)[0]
+                   
+                    # prediction_probabilities = dumbble_curl_model.predict_proba(X)[0]
+                    # class_prediction_probability = round(prediction_probabilities[np.argmax(prediction_probabilities)], 2)
+                    
                     # Visualize angle for left arm elbow
                     cv2.putText(image, f"Left Angle: {left_elbow_angle:.2f}", tuple(np.multiply(left_elbow, [640, 480]).astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
 
@@ -175,7 +211,8 @@ def video_stream(id):
                         if knee_angle < 100 and stage_left != 'down': 
                             stage_left = "down"
                 
-            except:
+            except Exception as e: 
+                print(e)
                 pass
             
             # Render counters
@@ -256,12 +293,23 @@ def statical():
     exercise_names, set_counts = get_total_set_by_user_and_workout(user['id'], mysql)
     repectition_left, repectition_right = get_total_left_right(user['id'], mysql)
     workout_date, total_set_day = get_total_left_right_by_date(user['id'], mysql)
+    workout_recent = get_work_out_recent(user['id'], mysql)
     return render_template('statical.html', total_date=total_date, 
                            total_set=total_set, repectition_left=repectition_left,
                            repectition_right=repectition_right,
                            exercise_names = exercise_names  , set_counts = set_counts,
-                           workout_date = workout_date, total_set_day = total_set_day)
+                           workout_date = workout_date, total_set_day = total_set_day,
+                           workout_recent = workout_recent)
 
+@app.route('/workout_date/<string:workout_date>')
+def workout_date(workout_date):
+    print('workout date', workout_date)
+    date_string = workout_date.split(' ')[0]  # Take only the date part
+    date_time = datetime.strptime(date_string, '%Y-%m-%d').date()
+    workout = get_workout_by_date(user['id'], date_time, mysql)
+    data = {"workout_date": workout}
+    return jsonify(data)
+    
 @app.route('/excercise_type')
 def display_excercise_type():
     return render_template('excercise_type.html')

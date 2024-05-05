@@ -19,3 +19,20 @@ def save_user(accountname, username, password, mysql):
     except Exception as e:
         print(e)
         return False
+
+def get_workout_by_date(user_id, date, mysql):
+    cur = mysql.connection.cursor()
+    
+    cur.execute('''
+            SELECT w.workout_date, e.excercise_name, count(e.excercise_name)
+            FROM workouts w
+            INNER JOIN sets s ON w.workout_id = s.workout_id
+            INNER JOIN excercises e ON s.excercise_id = e.excercise_id
+            WHERE w.user_id = %s AND w.workout_date = %s
+            GROUP BY e.excercise_name
+        ''', (user_id, date))
+    data = cur.fetchall()
+    cur.close()
+    print(data)
+   
+    return data
